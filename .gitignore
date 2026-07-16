@@ -1,0 +1,28 @@
+# Fichiers système
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Éditeurs
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Variables d'environnement
+.env
+.env.*
+!.env.example
+
+# Dépendances éventuelles
+node_modules/
+
+# Builds éventuels
+dist/
+build/
+
+# Fichiers temporaires
+tmp/
+temp/
+.cache/
