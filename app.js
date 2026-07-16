@@ -1,3 +1,5 @@
+//const installButton = document.querySelector("#installButton");
+
 let deferredInstallPrompt = null;
 
 const installButton = document.querySelector("#installButton");
