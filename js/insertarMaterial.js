@@ -1,24 +1,24 @@
 import { supabase } from "./supabase.js";
 
-export async function insertarMaterial(tabla, datos) {
-  if (!tabla) {
-    throw new Error("La tabla no está definida");
+export async function insertarMaterial(table, donnee) {
+  if (!table) {
+    throw new Error("La table n'est pas definie");
   }
 
-  if (!datos.nombre?.trim()) {
-    throw new Error("El nombre es obligatorio");
+  if (!donnee.nombre?.trim()) {
+    throw new Error("Le nom est obligatoire");
   }
 
-  const material = {
-    ...datos,
-    nombre: datos.nombre.trim(),
-    cantidad: Number(datos.cantidad ?? 0),
-    stock_minimo: Number(datos.stock_minimo ?? 0)
+  const materiel = {
+    ...donnee,
+    nom: donnee.nom.trim(),
+    quantite: Number(donnee.quantite ?? 0),
+    stock_minim: Number(donnee.stock_minim ?? 0)
   };
 
   const { data, error } = await supabase
-    .from(tabla)
-    .insert(material)
+    .from(table)
+    .insert(materiel)
     .select()
     .single();
 

@@ -1,45 +1,53 @@
 import { insertarMaterial } from "./insertarMaterial.js";
 
-const botonMostrar = document.querySelector("#boton-mostrar-bodega");
-const botonCancelar = document.querySelector("#boton-cancelar-bodega");
-const botonGuardar = document.querySelector("#boton-guardar-bodega");
-const formulario = document.querySelector("#form-bodega");
+const boutonFrom = document.querySelector("#bouton-bodega");
+const boutonAnnuler = document.querySelector("#bouton-annuler-bodega");
+const boutonSauvegarder = document.querySelector("#bouton-sauv-bodega");
+const formulaire = document.querySelector("#form-bodega");
 
-botonMostrar.addEventListener("click", () => {
-  formulario.hidden = false;
-  botonMostrar.hidden = true;
+boutonFrom.addEventListener("click", apparaitreform);
 
-  document.querySelector("#nombre-bodega").focus();
-});
+boutonAnnuler.addEventListener("click", annuler);
 
-botonCancelar.addEventListener("click", () => {
-  formulario.reset();
-  formulario.hidden = true;
-  botonMostrar.hidden = false;
-});
+function apparaitreform(){
+    formulaire.hidden = false;
+    boutonFrom.hidden = true;
 
-formulario.addEventListener("submit", async (evento) => {
+    document.querySelector("#nom-bodega").focus();
+}
+
+
+function annuler(){
+    formulaire.reset();
+    formulaire.hidden = true;
+    boutonFrom.hidden = false;
+
+}
+
+
+
+formulaire.addEventListener("submit", async (evento) => {
   evento.preventDefault();
 
-  botonGuardar.disabled = true;
+  boutonSauvegarder.disabled = true;
 
   try {
     await insertarMaterial("material_bodega", {
-      nombre: document.querySelector("#nombre-bodega").value,
-      cantidad: document.querySelector("#cantidad-bodega").value,
-      ubicacion:
-        document.querySelector("#ubicacion-bodega").value.trim() || null,
-      estado: "disponible"
+      nom: document.querySelector("#nome-bodega").value,
+      quantite: document.querySelector("#quantite-bodega").value,
+      lieu:
+        document.querySelector("#lieu-bodega").value.trim() || null,
+      etat: "disponible"
     });
 
-    formulario.reset();
-    formulario.hidden = true;
-    botonMostrar.hidden = false;
+    formulaire.reset();
+    formulaire.hidden = true;
+    boutonFrom.hidden = false;
 
-    alert("Material añadido correctamente");
+    alert("Materiel ajouté correctement");
   } catch (error) {
     alert(`Error: ${error.message}`);
   } finally {
-    botonGuardar.disabled = false;
+    boutonSauvegarder.disabled = false;
   }
 });
