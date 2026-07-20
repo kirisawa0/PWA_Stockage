@@ -26,3 +26,17 @@ button {
   padding: 0.75rem 1rem;
   cursor: pointer;
 }
+
+#bouton-mouvements {
+  display: inline-block;
+  padding: 10px 16px;
+  border-radius: 6px;
+  background-color: #222222;
+  color: #ffffff;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+#bouton-mouvements:hover {
+  opacity: 0.85;
+}
