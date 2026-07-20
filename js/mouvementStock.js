@@ -39,7 +39,7 @@ export async function enregistrerMouvementStock({
     cantidad: quantiteNumerique,
     motivo: motif,
     destino: destination,
-    usuario_id: donneesUtilisateur.user.id
+
   };
 
   const { data, error } = await supabase
