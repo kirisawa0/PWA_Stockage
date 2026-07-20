@@ -37,14 +37,7 @@ export async function enregistrerMouvementStock({
     error: erreurUtilisateur
   } = await supabase.auth.getUser();
 
-  if (
-    erreurUtilisateur ||
-    !donneesUtilisateur.user
-  ) {
-    throw new Error(
-      "Vous devez être connecté pour enregistrer un mouvement"
-    );
-  }
+  
 
   const mouvement = {
     [champIdentifiant]: identifiantMateriel,
