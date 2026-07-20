@@ -1,4 +1,7 @@
+import { supabase } from "./supabase.js";
 import { insertarMaterial } from "./insertarMaterial.js";
+
+const nomTable = "material_bodega";
 
 const boutonFrom = document.querySelector("#bouton-bodega");
 const boutonAnnuler = document.querySelector(
@@ -8,10 +11,63 @@ const boutonSauvegarder = document.querySelector(
   "#bouton-sauv-bodega"
 );
 const formulaire = document.querySelector("#form-bodega");
+const listeMateriel = document.querySelector("#liste_materiel");
+
+const formulaireModification = document.querySelector(
+  "#form-modification-bodega"
+);
+
+const identifiantModification = document.querySelector(
+  "#identifiant-modification-bodega"
+);
+
+const nomModification = document.querySelector(
+  "#nom-modification-bodega"
+);
+
+const quantiteModification = document.querySelector(
+  "#quantité-modification-bodega"
+);
+
+const lieuModification = document.querySelector(
+  "#lieu-modification-bodega"
+);
+
+const etatModification = document.querySelector(
+  "#etat-modification-bodega"
+);
+
+const boutonSauvegarderModification =
+  document.querySelector(
+    "#bouton-sauv-modification-bodega"
+  );
+
+const boutonAnnulerModification =
+  document.querySelector(
+    "#bouton-annuler-modification-bodega"
+  );
 
 boutonFrom.addEventListener("click", apparaitreform);
 boutonAnnuler.addEventListener("click", annuler);
 formulaire.addEventListener("submit", ajoutMat);
+
+listeMateriel.addEventListener(
+  "click",
+  gererBoutonsMateriel
+);
+
+formulaireModification.addEventListener(
+  "submit",
+  sauvegarderModification
+);
+
+boutonAnnulerModification.addEventListener(
+  "click",
+  annulerModification
+);
+
+afficherMateriel();
+
 
 function apparaitreform() {
   formulaire.hidden = false;
@@ -20,11 +76,13 @@ function apparaitreform() {
   document.querySelector("#nom-bodega").focus();
 }
 
+
 function annuler() {
   formulaire.reset();
   formulaire.hidden = true;
   boutonFrom.hidden = false;
 }
+
 
 async function ajoutMat(event) {
   event.preventDefault();
@@ -32,11 +90,11 @@ async function ajoutMat(event) {
   boutonSauvegarder.disabled = true;
 
   try {
-    await insertarMaterial("material_bodega", {
+    await insertarMaterial(nomTable, {
       nom: document.querySelector("#nom-bodega").value,
 
       quantite: document.querySelector(
-        "#quantite-bodega"
+        "#quantité-bodega"
       ).value,
 
       lieu:
@@ -51,11 +109,290 @@ async function ajoutMat(event) {
     formulaire.hidden = true;
     boutonFrom.hidden = false;
 
+    await afficherMateriel();
+
     alert("Matériel ajouté correctement");
   } catch (error) {
-    console.error("Erreur lors de l'ajout :", error);
+    console.error(
+      "Erreur lors de l'ajout du matériel :",
+      error
+    );
+
     alert(`Erreur : ${error.message}`);
   } finally {
     boutonSauvegarder.disabled = false;
+  }
+}
+
+
+async function recupererMateriel() {
+  const { data, error } = await supabase
+    .from(nomTable)
+    .select("*")
+    .order("created_at", {
+      ascending: false
+    });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+
+async function afficherMateriel() {
+  listeMateriel.innerHTML =
+    "<p>Chargement du matériel...</p>";
+
+  try {
+    const materiels = await recupererMateriel();
+
+    listeMateriel.innerHTML = "";
+
+    if (materiels.length === 0) {
+      listeMateriel.innerHTML =
+        "<p>Aucun matériel enregistré.</p>";
+
+      return;
+    }
+
+    materiels.forEach((materiel) => {
+      const carteMateriel =
+        document.createElement("article");
+
+      carteMateriel.className = "carte-materiel";
+
+      const nomMateriel =
+        document.createElement("h2");
+
+      nomMateriel.textContent = materiel.nombre;
+
+      const quantiteMateriel =
+        document.createElement("p");
+
+      quantiteMateriel.textContent =
+        `Quantité : ${materiel.cantidad}`;
+
+      const lieuMateriel =
+        document.createElement("p");
+
+      lieuMateriel.textContent =
+        `Lieu : ${materiel.ubicacion || "Non renseigné"}`;
+
+      const etatMateriel =
+        document.createElement("p");
+
+      etatMateriel.textContent =
+        `État : ${materiel.estado}`;
+
+      const boutonModifier =
+        document.createElement("button");
+
+      boutonModifier.type = "button";
+      boutonModifier.className =
+        "bouton-modifier-materiel";
+      boutonModifier.dataset.identifiant =
+        materiel.id;
+      boutonModifier.textContent = "Modifier";
+
+      const boutonSupprimer =
+        document.createElement("button");
+
+      boutonSupprimer.type = "button";
+      boutonSupprimer.className =
+        "bouton-supprimer-materiel";
+      boutonSupprimer.dataset.identifiant =
+        materiel.id;
+      boutonSupprimer.textContent = "Supprimer";
+
+      carteMateriel.append(
+        nomMateriel,
+        quantiteMateriel,
+        lieuMateriel,
+        etatMateriel,
+        boutonModifier,
+        boutonSupprimer
+      );
+
+      listeMateriel.appendChild(carteMateriel);
+    });
+  } catch (error) {
+    console.error(
+      "Erreur lors du chargement du matériel :",
+      error
+    );
+
+    listeMateriel.innerHTML =
+      "<p>Impossible de charger le matériel.</p>";
+  }
+}
+
+
+async function gererBoutonsMateriel(event) {
+  const boutonModifier = event.target.closest(
+    ".bouton-modifier-materiel"
+  );
+
+  const boutonSupprimer = event.target.closest(
+    ".bouton-supprimer-materiel"
+  );
+
+  if (boutonModifier) {
+    await ouvrirModification(
+      boutonModifier.dataset.identifiant
+    );
+
+    return;
+  }
+
+  if (boutonSupprimer) {
+    await supprimerMateriel(
+      boutonSupprimer.dataset.identifiant
+    );
+  }
+}
+
+
+async function recupererMaterielParIdentifiant(
+  identifiantMateriel
+) {
+  const { data, error } = await supabase
+    .from(nomTable)
+    .select("*")
+    .eq("id", identifiantMateriel)
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+
+async function ouvrirModification(
+  identifiantMateriel
+) {
+  try {
+    const materiel =
+      await recupererMaterielParIdentifiant(
+        identifiantMateriel
+      );
+
+    identifiantModification.value = materiel.id;
+    nomModification.value = materiel.nombre;
+    quantiteModification.value = materiel.cantidad;
+    lieuModification.value =
+      materiel.ubicacion || "";
+    etatModification.value = materiel.estado;
+
+    formulaireModification.hidden = false;
+    nomModification.focus();
+  } catch (error) {
+    console.error(
+      "Erreur lors de l'ouverture du matériel :",
+      error
+    );
+
+    alert(`Erreur : ${error.message}`);
+  }
+}
+
+
+async function sauvegarderModification(event) {
+  event.preventDefault();
+
+  boutonSauvegarderModification.disabled = true;
+
+  const quantite =
+    Number(quantiteModification.value);
+
+  if (!Number.isInteger(quantite) || quantite < 0) {
+    alert(
+      "La quantité doit être un nombre entier positif"
+    );
+
+    boutonSauvegarderModification.disabled = false;
+    return;
+  }
+
+  const informationsModifiees = {
+    nombre: nomModification.value.trim(),
+    cantidad: quantite,
+    ubicacion:
+      lieuModification.value.trim() || null,
+    estado: etatModification.value
+  };
+
+  try {
+    const { error } = await supabase
+      .from(nomTable)
+      .update(informationsModifiees)
+      .eq(
+        "id",
+        identifiantModification.value
+      );
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    formulaireModification.reset();
+    formulaireModification.hidden = true;
+
+    await afficherMateriel();
+
+    alert("Matériel modifié correctement");
+  } catch (error) {
+    console.error(
+      "Erreur lors de la modification :",
+      error
+    );
+
+    alert(`Erreur : ${error.message}`);
+  } finally {
+    boutonSauvegarderModification.disabled = false;
+  }
+}
+
+
+function annulerModification() {
+  formulaireModification.reset();
+  formulaireModification.hidden = true;
+}
+
+
+async function supprimerMateriel(
+  identifiantMateriel
+) {
+  const confirmation = window.confirm(
+    "Voulez-vous vraiment supprimer ce matériel ?"
+  );
+
+  if (!confirmation) {
+    return;
+  }
+
+  try {
+    const { error } = await supabase
+      .from(nomTable)
+      .delete()
+      .eq("id", identifiantMateriel);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    await afficherMateriel();
+
+    alert("Matériel supprimé correctement");
+  } catch (error) {
+    console.error(
+      "Erreur lors de la suppression :",
+      error
+    );
+
+    alert(`Erreur : ${error.message}`);
   }
 }

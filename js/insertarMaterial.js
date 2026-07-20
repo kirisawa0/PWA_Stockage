@@ -9,21 +9,21 @@ export async function insertarMaterial(table, donnee) {
     throw new Error("Le nom est obligatoire");
   }
 
+  const quantite = Number(donnee.quantite ?? 0);
+
+  if (!Number.isInteger(quantite) || quantite < 0) {
+    throw new Error(
+      "La quantité doit être un nombre entier positif"
+    );
+  }
+
   const materiel = {
     nombre: donnee.nom.trim(),
-    cantidad: Number(donnee.quantite ?? 0),
-    stock_minimo: Number(donnee.stock_minim ?? 0),
+    cantidad: quantite,
+    stock_minimo: Number(donnee.stockMinim ?? 0),
     ubicacion: donnee.lieu?.trim() || null,
     estado: donnee.etat || "disponible"
   };
-
-  if (!Number.isInteger(materiel.cantidad)) {
-    throw new Error("La quantité doit être un nombre entier");
-  }
-
-  if (materiel.cantidad < 0) {
-    throw new Error("La quantité ne peut pas être négative");
-  }
 
   const { data, error } = await supabase
     .from(table)
