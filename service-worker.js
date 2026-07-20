@@ -4,6 +4,7 @@ const FILES_TO_CACHE = [
   "./",
   "./index.html",
   "./styles.css",
+  "./mouvements.html",
   "./js/app.js",
   "./js/mouvement.js",
   "./manifest.webmanifest",
