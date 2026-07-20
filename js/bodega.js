@@ -26,28 +26,31 @@ function annuler(){
 
 
 
-formulaire.addEventListener("submit", async (evento) => {
-  evento.preventDefault();
+formulaire.addEventListener("submit", ajoutMat);
 
-  boutonSauvegarder.disabled = true;
+async function ajoutMat(event) {
+    event.preventDefault();
 
-  try {
-    await insertarMaterial("material_bodega", {
-      nom: document.querySelector("#nome-bodega").value,
-      quantite: document.querySelector("#quantite-bodega").value,
-      lieu:
-        document.querySelector("#lieu-bodega").value.trim() || null,
-      etat: "disponible"
-    });
+    boutonSauvegarder.disabled = true;
 
-    formulaire.reset();
-    formulaire.hidden = true;
-    boutonFrom.hidden = false;
+    try {
+        await insertarMaterial("material_bodega", {
+        nom: document.querySelector("#nom-bodega").value,
+        quantite: document.querySelector("#quantite-bodega").value,
+        lieu:
+            document.querySelector("#lieu-bodega").value.trim() || null,
+        etat: "disponible"
+        });
 
-    alert("Materiel ajouté correctement");
-  } catch (error) {
-    alert(`Error: ${error.message}`);
-  } finally {
-    boutonSauvegarder.disabled = false;
-  }
-});
+        formulaire.reset();
+        formulaire.hidden = true;
+        boutonFrom.hidden = false;
+
+        alert("Materiel ajouté correctement");
+        } catch (error) {
+            alert(`Error: ${error.message}`);
+        } finally {
+            boutonSauvegarder.disabled = false;
+        }
+
+}
