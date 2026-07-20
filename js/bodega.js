@@ -305,12 +305,13 @@ async function ouvrirModification(
 
 async function sauvegarderModification(event) {
     event.preventDefault();
-        const materielActuel = await recupererMaterielParIdentifiant(identifiantModification.value);
+    const materielActuel = await recupererMaterielParIdentifiant(identifiantModification.value);
 
-        const differenceQuantite = quantite - materielActuel.cantidad;
-        boutonSauvegarderModification.disabled = true;
+        
 
     const quantite = Number(quantiteModification.value);
+    const differenceQuantite = quantite - materielActuel.cantidad;
+        boutonSauvegarderModification.disabled = true;
 
     if (!Number.isInteger(quantite) || quantite < 0) {
         alert(
@@ -340,7 +341,7 @@ async function sauvegarderModification(event) {
         if (error) {
             throw new Error(error.message);
         }
-        
+
         if (differenceQuantite > 0) {
             await enregistrerMouvementStock({
                 nomTable,
