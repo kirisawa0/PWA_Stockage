@@ -26,7 +26,7 @@ const nomModification = document.querySelector(
 );
 
 const quantiteModification = document.querySelector(
-  "#quantité-modification-bodega"
+  "#quantite-modification-bodega"
 );
 
 const lieuModification = document.querySelector(
@@ -94,7 +94,7 @@ async function ajoutMat(event) {
       nom: document.querySelector("#nom-bodega").value,
 
       quantite: document.querySelector(
-        "#quantité-bodega"
+        "#quantite-bodega"
       ).value,
 
       lieu:
