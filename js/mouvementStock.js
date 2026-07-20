@@ -32,12 +32,6 @@ export async function enregistrerMouvementStock({
     );
   }
 
-  const {
-    data: donneesUtilisateur,
-    error: erreurUtilisateur
-  } = await supabase.auth.getUser();
-
-  
 
   const mouvement = {
     [champIdentifiant]: identifiantMateriel,
