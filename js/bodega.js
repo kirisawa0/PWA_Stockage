@@ -1,5 +1,8 @@
 import { supabase } from "./supabase.js";
 import { insertarMaterial } from "./insertarMaterial.js";
+import {
+  enregistrerMouvementStock
+} from "./mouvementStock.js";
 
 const nomTable = "material_bodega";
 
@@ -301,65 +304,87 @@ async function ouvrirModification(
 
 
 async function sauvegarderModification(event) {
-  event.preventDefault();
+    event.preventDefault();
+        const materielActuel = await recupererMaterielParIdentifiant(identifiantModification.value);
 
-  boutonSauvegarderModification.disabled = true;
+        const differenceQuantite = quantite - materielActuel.cantidad;
+        boutonSauvegarderModification.disabled = true;
 
-  const quantite =
-    Number(quantiteModification.value);
+    const quantite = Number(quantiteModification.value);
 
-  if (!Number.isInteger(quantite) || quantite < 0) {
-    alert(
-      "La quantité doit être un nombre entier positif"
-    );
+    if (!Number.isInteger(quantite) || quantite < 0) {
+        alert(
+        "La quantité doit être un nombre entier positif"
+        );
 
-    boutonSauvegarderModification.disabled = false;
-    return;
-  }
-
-  const informationsModifiees = {
-    nombre: nomModification.value.trim(),
-    cantidad: quantite,
-    ubicacion:
-      lieuModification.value.trim() || null,
-    estado: etatModification.value
-  };
-
-  try {
-    const { error } = await supabase
-      .from(nomTable)
-      .update(informationsModifiees)
-      .eq(
-        "id",
-        identifiantModification.value
-      );
-
-    if (error) {
-      throw new Error(error.message);
+        boutonSauvegarderModification.disabled = false;
+        return;
     }
 
-    formulaireModification.reset();
-    formulaireModification.hidden = true;
+    const informationsModifiees = {
+        nombre: nomModification.value.trim(),
+        ubicacion:
+        lieuModification.value.trim() || null,
+        estado: etatModification.value
+    };
 
-    await afficherMateriel();
+    try {
+        const { error } = await supabase
+        .from(nomTable)
+        .update(informationsModifiees)
+        .eq(
+            "id",
+            identifiantModification.value
+        );
 
-    alert("Matériel modifié correctement");
-  } catch (error) {
-    console.error(
-      "Erreur lors de la modification :",
-      error
-    );
+        if (error) {
+            throw new Error(error.message);
+        }
+        
+        if (differenceQuantite > 0) {
+            await enregistrerMouvementStock({
+                nomTable,
+                identifiantMateriel:
+                identifiantModification.value,
+                typeMouvement: "ajuste_positivo",
+                quantite: differenceQuantite,
+                motif: "Modification manuelle du stock"
+            });
+            }
 
-    alert(`Erreur : ${error.message}`);
-  } finally {
-    boutonSauvegarderModification.disabled = false;
-  }
+            if (differenceQuantite < 0) {
+            await enregistrerMouvementStock({
+                nomTable,
+                identifiantMateriel:
+                identifiantModification.value,
+                typeMouvement: "ajuste_negativo",
+                quantite: Math.abs(differenceQuantite),
+                motif: "Modification manuelle du stock"
+            });
+            }
+
+        formulaireModification.reset();
+        formulaireModification.hidden = true;
+
+        await afficherMateriel();
+
+        alert("Matériel modifié correctement");
+    } catch (error) {
+        console.error(
+        "Erreur lors de la modification :",
+        error
+        );
+
+        alert(`Erreur : ${error.message}`);
+    } finally {
+        boutonSauvegarderModification.disabled = false;
+    }
 }
 
 
 function annulerModification() {
-  formulaireModification.reset();
-  formulaireModification.hidden = true;
+    formulaireModification.reset();
+    formulaireModification.hidden = true;
 }
 
 
