@@ -5,6 +5,7 @@ const FILES_TO_CACHE = [
   "./index.html",
   "./styles.css",
   "./js/app.js",
+  "./js/mouvements.js",
   "./manifest.webmanifest",
   "./icons/icon-192.svg",
   "./icons/icon-512.svg"
@@ -14,7 +15,7 @@ const FILES_TO_CACHE = [
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
+      return cache.addAll(FILES_TO_CACHE);
     })
   );
 
