@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="./icons/icon-192.svg">
   <link rel="stylesheet" href="./styles.css">
 
-  <script type="module" src="./js/bodega.js"></script>
+  <script type="module" src="./js/materiel.js"></script>
   <script type="module" src="./js/app.js"></script>
 
   <title>PWA de Stockage</title>
@@ -25,8 +25,12 @@
   <main>
     <p>Votre contenu apparaîtra ici.</p>
     <div id="liste_materiel"></div>
-    <form id="form-modification-bodega" hidden>
-    <input id="identifiant-modification-bodega" type="hidden">
+    <dialog
+      id="fenetre-modification-mat"
+      class="fenetre-formulaire"
+    >
+    <form id="form-modification-mat" hidden>
+    <input id="identifiant-modification-mat" type="hidden">
 
     <label for="nom-modification-mat">
       Nom
@@ -78,10 +82,16 @@
       Annuler
     </button>
   </form>
+  </dialog>
+
     <button id="bouton-mat" type="button">
       Ajouter materiel
     </button>
 
+    <dialog
+      id="fenetre-ajout-mat"
+      class="fenetre-formulaire"
+    >
     <form id="form-mat" hidden>
       <input id="nom-mat" type="text" placeholder="Nom" required>
 
@@ -94,7 +104,7 @@
       >
 
       <input
-        id="lieu-bodega"
+        id="lieu-mat"
         type="text"
         placeholder="Ubicación"
       >
@@ -107,7 +117,7 @@
         Annuler
       </button>
     </form>
-
+    </dialog>
     
 
     <button id="installButton" hidden>
