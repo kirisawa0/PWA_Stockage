@@ -284,7 +284,7 @@ async function ouvrirModification(
       materiel.ubicacion || "";
     etatModification.value = materiel.estado;
 
-    formulaireModification.hidden = false;
+    fenetreModification.showModal();
     nomModification.focus();
   } catch (error) {
     console.error(
@@ -359,7 +359,7 @@ async function sauvegarderModification(event) {
             }
 
         formulaireModification.reset();
-        formulaireModification.hidden = true;
+        fenetreModification.close();
 
         await afficherMateriel();
 
@@ -379,7 +379,7 @@ async function sauvegarderModification(event) {
 
 function annulerModification() {
     formulaireModification.reset();
-    formulaireModification.hidden = true;
+    fenetreModification.close();
 }
 
 
