@@ -5,14 +5,11 @@ import {
 } from "./mouvementStock.js";
 
 const nomTable = "material_bodega";
-
+const fenetreAjout = document.querySelector("#fenetre-ajout-bodega");
+const fenetreModification = document.querySelector("#fenetre-modification-bodega");
 const boutonFrom = document.querySelector("#bouton-bodega");
-const boutonAnnuler = document.querySelector(
-  "#bouton-annuler-bodega"
-);
-const boutonSauvegarder = document.querySelector(
-  "#bouton-sauv-bodega"
-);
+const boutonAnnuler = document.querySelector("#bouton-annuler-bodega");
+const boutonSauvegarder = document.querySelector("#bouton-sauv-bodega");
 const formulaire = document.querySelector("#form-bodega");
 const listeMateriel = document.querySelector("#liste_materiel");
 
@@ -73,8 +70,7 @@ afficherMateriel();
 
 
 function apparaitreform() {
-  formulaire.hidden = false;
-  boutonFrom.hidden = true;
+  fenetreAjout.showModal();
 
   document.querySelector("#nom-bodega").focus();
 }
@@ -82,8 +78,7 @@ function apparaitreform() {
 
 function annuler() {
   formulaire.reset();
-  formulaire.hidden = true;
-  boutonFrom.hidden = false;
+  fenetreAjout.close();
 }
 
 
@@ -109,8 +104,7 @@ async function ajoutMat(event) {
     });
 
     formulaire.reset();
-    formulaire.hidden = true;
-    boutonFrom.hidden = false;
+    fenetreAjout.close();;
 
     await afficherMateriel();
 

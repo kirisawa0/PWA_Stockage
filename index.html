@@ -12,6 +12,7 @@
   <link rel="apple-touch-icon" href="./icons/icon-192.svg">
   <link rel="stylesheet" href="./styles.css">
 
+  <script type="module" src="./js/bodega.js"></script>
   <script type="module" src="./js/app.js"></script>
 
   <title>PWA de Stockage</title>
@@ -24,90 +25,101 @@
   <main>
     <p>Votre contenu apparaîtra ici.</p>
     <div id="liste_materiel"></div>
-    <form id="form-modification-bodega" hidden>
-    <input id="identifiant-modification-bodega" type="hidden">
-
-    <label for="nom-modification-bodega">
-      Nom
-    </label>
-
-    <input
-      id="nom-modification-bodega"
-      type="text"
-      required
+    <dialog
+      id="fenetre-modification-bodega"
+      class="fenetre-formulaire"
     >
+      <form id="form-modification-bodega" >
+      <input id="identifiant-modification-bodega" type="hidden">
 
-    <label for="quantite-modification-bodega">
-      Quantité
-    </label>
+      <label for="nom-modification-bodega">
+        Nom
+      </label>
 
-    <input
-      id="quantite-modification-bodega"
-      type="number"
-      min="0"
-      required
-    >
+      <input
+        id="nom-modification-bodega"
+        type="text"
+        required
+      >
 
-    <label for="lieu-modification-bodega">
-      Lieu
-    </label>
+      <label for="quantite-modification-bodega">
+        Quantité
+      </label>
 
-    <input
-      id="lieu-modification-bodega"
-      type="text"
-    >
+      <input
+        id="quantite-modification-bodega"
+        type="number"
+        min="0"
+        required
+      >
 
-    <label for="etat-modification-bodega">
-      État
-    </label>
+      <label for="lieu-modification-bodega">
+        Lieu
+      </label>
 
-    <select id="etat-modification-bodega">
-      <option value="disponible">Disponible</option>
-      <option value="reservado">Réservé</option>
-      <option value="agotado">Épuisé</option>
-      <option value="dañado">Endommagé</option>
-      <option value="retirado">Retiré</option>
-    </select>
+      <input
+        id="lieu-modification-bodega"
+        type="text"
+      >
 
-    <button id="bouton-sauv-modification-bodega" type="submit">
-      Sauvegarder les modifications
-    </button>
+      <label for="etat-modification-bodega">
+        État
+      </label>
 
-    <button id="bouton-annuler-modification-bodega" type="button">
-      Annuler
-    </button>
-  </form>
+      <select id="etat-modification-bodega">
+        <option value="disponible">Disponible</option>
+        <option value="reservado">Réservé</option>
+        <option value="agotado">Épuisé</option>
+        <option value="dañado">Endommagé</option>
+        <option value="retirado">Retiré</option>
+      </select>
+
+      <button id="bouton-sauv-modification-bodega" type="submit">
+        Sauvegarder les modifications
+      </button>
+
+      <button id="bouton-annuler-modification-bodega" type="button">
+        Annuler
+      </button>
+    </form>
+  </dialog>
+
     <button id="bouton-bodega" type="button">
       Ajouter materiel
     </button>
 
-    <form id="form-bodega" hidden>
-      <input id="nom-bodega" type="text" placeholder="Nom" required>
+    <dialog
+      id="fenetre-ajout-bodega"
+      class="fenetre-formulaire"
+    >
+      <form id="form-bodega" >
+        <input id="nom-bodega" type="text" placeholder="Nom" required>
 
-      <input
-        id="quantite-bodega"
-        type="number"
-        min="0"
-        placeholder="Quantite"
-        required
-      >
+        <input
+          id="quantite-bodega"
+          type="number"
+          min="0"
+          placeholder="Quantite"
+          required
+        >
 
-      <input
-        id="lieu-bodega"
-        type="text"
-        placeholder="Ubicación"
-      >
+        <input
+          id="lieu-bodega"
+          type="text"
+          placeholder="Ubicación"
+        >
 
-      <button id="bouton-sauv-bodega" type="submit">
-        Sauvegarder
-      </button>
+        <button id="bouton-sauv-bodega" type="submit">
+          Sauvegarder
+        </button>
 
-      <button id="bouton-annuler-bodega" type="button">
-        Annuler
-      </button>
-    </form>
+        <button id="bouton-annuler-bodega" type="button">
+          Annuler
+        </button>
+      </form>
+    </dialog>
 
-    <script type="module" src="./js/bodega.js"></script>
+    
 
     <button id="installButton" hidden>
       Installer l'application
