@@ -94,8 +94,14 @@ function actualiserDateFinMinimum() {
 async function recupererMinibus() {
   const { data, error } = await supabase
     .from("minibus")
-    .select("id, nombre")
-    .order("nombre", {
+    .select(`
+      id,
+      immatriculation,
+      nom,
+      capacite
+    `)
+    .eq("etat", "disponible")
+    .order("immatriculation", {
       ascending: true
     });
 
@@ -106,27 +112,32 @@ async function recupererMinibus() {
   return data;
 }
 
-
 async function remplirSelectionMinibus() {
   try {
-    const minibus = await recupererMinibus();
+    const listeMinibus = await recupererMinibus();
 
-    minibus.forEach((minibus) => {
+    listeMinibus.forEach((vehicule) => {
       const option = document.createElement("option");
 
-      option.value = minibus.id;
-      option.textContent = minibus.nombre;
+      option.value = vehicule.id;
+
+      option.textContent =
+        vehicule.immatriculation +
+        (
+          vehicule.nom
+            ? ` — ${vehicule.nom}`
+            : ""
+        );
 
       selectionMinibus.appendChild(option);
     });
   } catch (error) {
     afficherMessageReservation(
-      `Impossible de charger les Minibus : ${error.message}`,
+      `Impossible de charger les minibus : ${error.message}`,
       true
     );
   }
 }
-
 
 function verifierDatesReservation() {
   if (

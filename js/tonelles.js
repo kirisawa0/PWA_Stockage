@@ -2,17 +2,14 @@ import { supabase } from "./supabase.js";
 import { insertarMaterial } from "./insertarMaterial.js";
 
 const boutonTonnelle = document.querySelector(
-  "#bouton-tonnelle"
-);
+  "#bouton-tonnelle");
 
 const boutonAnnulerTonnelle = document.querySelector(
-  "#bouton-annuler-tonnelle"
-);
+  "#bouton-annuler-tonnelle");
 
 const boutonSauvegarderTonnelle =
   document.querySelector(
-    "#bouton-sauv-tonnelle"
-  );
+    "#bouton-sauv-tonnelle");
 
 const formulaireTonnelle = document.querySelector(
   "#form-tonnelle"

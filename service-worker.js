@@ -7,9 +7,15 @@ const FILES_TO_CACHE = [
   "./reservation-tonnelles.html",
   "./agenda-tonnelles.html",
   "./tonnelles.html",
+  "./reservationMinibus.html",
+  "./agendaMinibus.html",
+  "./minibus.html",
 
   "./styles.css",
 
+  "./js/minibus.js",
+  "./js/reservationMinibus.js",
+  "./js/agendaMinibus.js",
   "./js/tonelles.js",
   "./js/app.js",
   "./js/mouvement.js",
