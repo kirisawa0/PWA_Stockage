@@ -162,15 +162,23 @@ async function afficherMoisSuivant() {
 
 
 async function recupererReservationsMois() {
-  const premierJour = new Date(
+  const premierJourMois = new Date(
     dateMoisAffiche.getFullYear(),
     dateMoisAffiche.getMonth(),
-    1
+    1,
+    0,
+    0,
+    0,
+    0
   );
 
-  const dernierJour = new Date(
+  const premierJourMoisSuivant = new Date(
     dateMoisAffiche.getFullYear(),
     dateMoisAffiche.getMonth() + 1,
+    1,
+    0,
+    0,
+    0,
     0
   );
 
@@ -181,6 +189,8 @@ async function recupererReservationsMois() {
       nom_reservation,
       responsable,
       telephone,
+      destination,
+      nombre_passagers,
       date_debut,
       date_fin,
       statut,
@@ -191,13 +201,13 @@ async function recupererReservationsMois() {
       identifiantMinibusSelectionnee
     )
     .neq("statut", "annulee")
-    .lte(
+    .lt(
       "date_debut",
-      formaterDateSql(dernierJour)
+      premierJourMoisSuivant.toISOString()
     )
-    .gte(
+    .gt(
       "date_fin",
-      formaterDateSql(premierJour)
+      premierJourMois.toISOString()
     )
     .order("date_debut", {
       ascending: true
@@ -348,12 +358,40 @@ function obtenirReservationPourDate(
   date,
   reservations
 ) {
-  const dateFormatee = formaterDateSql(date);
+  const debutJour = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    0,
+    0,
+    0,
+    0
+  );
+
+  const finJour = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate() + 1,
+    0,
+    0,
+    0,
+    0
+  );
 
   return reservations.find((reservation) => {
+    const debutReservation =
+      creerDateDepuisSql(
+        reservation.date_debut
+      );
+
+    const finReservation =
+      creerDateDepuisSql(
+        reservation.date_fin
+      );
+
     return (
-      dateFormatee >= reservation.date_debut &&
-      dateFormatee <= reservation.date_fin
+      debutReservation < finJour &&
+      finReservation > debutJour
     );
   });
 }
@@ -433,7 +471,8 @@ function formaterPeriode(reservation) {
 
   const formateur =
     new Intl.DateTimeFormat("fr-FR", {
-      dateStyle: "medium"
+      dateStyle: "medium",
+      timeStyle: "short"
     });
 
   return (
@@ -444,29 +483,37 @@ function formaterPeriode(reservation) {
 
 
 function creerDateDepuisSql(dateSql) {
-  const [annee, mois, jour] =
-    dateSql.split("-").map(Number);
+  if (!dateSql) {
+    throw new Error(
+      "La date de réservation est absente"
+    );
+  }
 
-  return new Date(
-    annee,
-    mois - 1,
-    jour
-  );
+  // Compatibility with old date-only reservations.
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateSql)) {
+    const [annee, mois, jour] =
+      dateSql.split("-").map(Number);
+
+    return new Date(
+      annee,
+      mois - 1,
+      jour
+    );
+  }
+
+  const date = new Date(dateSql);
+
+  if (Number.isNaN(date.getTime())) {
+    throw new Error(
+      `Date de réservation invalide : ${dateSql}`
+    );
+  }
+
+  return date;
 }
 
 
-function formaterDateSql(date) {
-  const annee = date.getFullYear();
-  const mois = String(
-    date.getMonth() + 1
-  ).padStart(2, "0");
 
-  const jour = String(
-    date.getDate()
-  ).padStart(2, "0");
-
-  return `${annee}-${mois}-${jour}`;
-}
 
 
 function estDateAujourdhui(date) {
