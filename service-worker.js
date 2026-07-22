@@ -1,4 +1,4 @@
-const CACHE_NAME = "pwa-github-v9";
+const CACHE_NAME = "pwa-github-v8";
 
 const FILES_TO_CACHE = [
   "./",
