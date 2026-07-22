@@ -6,7 +6,7 @@ const selectionMinibusAgenda =
   );
 
 const agendaMinibus = document.querySelector(
-  "#agenda-Minibus"
+  "#agenda-minibus"
 );
 
 const titreMoisAgenda = document.querySelector(
@@ -84,20 +84,38 @@ async function recupererMinibus() {
 }
 
 
-async function remplirSelectionMinibus() {
-  const minibus = await recupererMinibus();
+async function remplirSelectionMinibusAgenda() {
+  try {
+    const minibus = await recupererMinibus();
 
-  minibus.forEach((vehicule) => {
-    const option = document.createElement("option");
+    selectionMinibusAgenda.innerHTML = `
+      <option value="">
+        Sélectionner un minibus
+      </option>
+    `;
 
-    option.value = vehicule.id;
+    minibus.forEach((vehicule) => {
+      const option = document.createElement("option");
 
-    option.textContent =
-      `${vehicule.immatriculation}` +
-      `${vehicule.nom ? ` — ${vehicule.nom}` : ""}`;
+      option.value = vehicule.id;
 
-    selectionMinibus.appendChild(option);
-  });
+      option.textContent =
+        vehicule.immatriculation +
+        (vehicule.nom ? ` — ${vehicule.nom}` : "");
+
+      selectionMinibusAgenda.appendChild(option);
+    });
+  } catch (error) {
+    console.error(
+      "Erreur lors du chargement des minibus :",
+      error
+    );
+
+    afficherMessageAgenda(
+      `Impossible de charger les minibus : ${error.message}`,
+      true
+    );
+  }
 }
 
 
