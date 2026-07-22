@@ -41,6 +41,17 @@ const messageReservation = document.querySelector(
   "#message-reservation"
 );
 
+const destinationReservation =
+  document.querySelector(
+    "#destination-reservation"
+  );
+
+const nombrePassagersReservation =
+  document.querySelector(
+    "#nombre-passagers-reservation"
+  );
+
+
 initialiserPageReservation();
 
 
