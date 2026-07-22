@@ -77,3 +77,141 @@ button {
   justify-content: flex-end;
   gap: 0.75rem;
 }
+
+.entete-page nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.entete-page a {
+  color: inherit;
+}
+
+.page-reservations {
+  width: min(100%, 1000px);
+  margin-inline: auto;
+}
+
+.formulaire-reservation {
+  display: grid;
+  gap: 0.75rem;
+  width: min(100%, 550px);
+}
+
+.formulaire-reservation input,
+.formulaire-reservation select,
+.formulaire-reservation textarea,
+#selection-tonnelle-agenda {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #cccccc;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.message-erreur {
+  color: #b00020;
+}
+
+.message-succes {
+  color: #176b2c;
+}
+
+.agenda-tonnelle {
+  margin-top: 1.5rem;
+}
+
+.navigation-agenda {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1rem;
+}
+
+.navigation-agenda h2 {
+  margin: 0;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.entete-grille-agenda,
+.grille-agenda {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.entete-grille-agenda {
+  margin-top: 1rem;
+  text-align: center;
+  font-weight: bold;
+}
+
+.entete-grille-agenda span {
+  padding: 0.5rem 0.25rem;
+}
+
+.jour-agenda {
+  min-height: 95px;
+  padding: 0.5rem;
+  border: 1px solid #dddddd;
+  overflow: hidden;
+}
+
+.jour-agenda strong,
+.jour-agenda span {
+  display: block;
+}
+
+.jour-agenda span {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+
+.jour-agenda-vide {
+  background: #f4f4f4;
+}
+
+.jour-agenda-aujourdhui {
+  outline: 2px solid #222222;
+  outline-offset: -2px;
+}
+
+.jour-agenda-reserve {
+  background: #ffe0a8;
+}
+
+.details-reservations {
+  margin-top: 1.5rem;
+}
+
+#liste-reservations-agenda {
+  display: grid;
+  gap: 1rem;
+}
+
+.carte-reservation {
+  padding: 1rem;
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+}
+
+.carte-reservation h3 {
+  margin-top: 0;
+}
+
+@media (max-width: 650px) {
+  .jour-agenda {
+    min-height: 65px;
+    padding: 0.25rem;
+  }
+
+  .jour-agenda span {
+    font-size: 0.65rem;
+  }
+
+  .entete-grille-agenda {
+    font-size: 0.75rem;
+  }
+}
