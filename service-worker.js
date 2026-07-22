@@ -1,4 +1,4 @@
-const CACHE_NAME = "pwa-github-v4";
+const CACHE_NAME = "pwa-github-v5";
 
 const FILES_TO_CACHE = [
   "./",
@@ -6,7 +6,11 @@ const FILES_TO_CACHE = [
   "./mouvements.html",
   "./reservation-tonnelles.html",
   "./agenda-tonnelles.html",
+  "./tonnelles.html",
+
   "./styles.css",
+
+  "./js/tonelles.js",
   "./js/app.js",
   "./js/mouvement.js",
   "./js/reservationTonnelles.js",

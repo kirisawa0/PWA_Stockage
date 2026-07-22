@@ -1,56 +1,200 @@
+import { supabase } from "./supabase.js";
 import { insertarMaterial } from "./insertarMaterial.js";
 
-const boutonFrom = document.querySelector("#bouton-bodega");
-const boutonAnnuler = document.querySelector("#bouton-annuler-bodega");
-const boutonSauvegarder = document.querySelector("#bouton-sauv-bodega");
-const formulaire = document.querySelector("#form-bodega");
+const boutonTonnelle = document.querySelector(
+  "#bouton-tonnelle"
+);
 
-boutonFrom.addEventListener("click", apparaitreform);
+const boutonAnnulerTonnelle = document.querySelector(
+  "#bouton-annuler-tonnelle"
+);
 
-boutonAnnuler.addEventListener("click", annuler);
+const boutonSauvegarderTonnelle =
+  document.querySelector(
+    "#bouton-sauv-tonnelle"
+  );
 
-function apparaitreform(){
-    formulaire.hidden = false;
-    boutonFrom.hidden = true;
+const formulaireTonnelle = document.querySelector(
+  "#form-tonnelle"
+);
 
-    document.querySelector("#nom-bodega").focus();
+const fenetreAjoutTonnelle = document.querySelector(
+  "#fenetre-ajout-tonnelle"
+);
+
+const listeTonnelles = document.querySelector(
+  "#liste-tonnelles"
+);
+
+boutonTonnelle.addEventListener(
+  "click",
+  apparaitreFormulaireTonnelle
+);
+
+boutonAnnulerTonnelle.addEventListener(
+  "click",
+  annulerAjoutTonnelle
+);
+
+formulaireTonnelle.addEventListener(
+  "submit",
+  ajouterTonnelle
+);
+
+fenetreAjoutTonnelle.addEventListener(
+  "click",
+  fermerFormulaireEnCliquantDehors
+);
+
+afficherTonnelles();
+
+
+function apparaitreFormulaireTonnelle() {
+  fenetreAjoutTonnelle.showModal();
+
+  document
+    .querySelector("#nom-tonnelle")
+    .focus();
 }
 
 
-function annuler(){
-    formulaire.reset();
-    formulaire.hidden = true;
-    boutonFrom.hidden = false;
-
+function annulerAjoutTonnelle() {
+  formulaireTonnelle.reset();
+  fenetreAjoutTonnelle.close();
 }
 
 
+function fermerFormulaireEnCliquantDehors(event) {
+  if (event.target !== fenetreAjoutTonnelle) {
+    return;
+  }
 
-formulaire.addEventListener("submit", ajoutMat);
+  annulerAjoutTonnelle();
+}
 
-async function ajoutMat(event) {
-    event.preventDefault();
 
-    boutonSauvegarder.disabled = true;
+async function ajouterTonnelle(event) {
+  event.preventDefault();
 
-    try {
-        await insertarMaterial("material_bodega", {
-        nom: document.querySelector("#nom-bodega").value,
-        quantite: document.querySelector("#quantite-bodega").value,
-        lieu:
-            document.querySelector("#lieu-bodega").value.trim() || null,
-        etat: "disponible"
-        });
+  boutonSauvegarderTonnelle.disabled = true;
 
-        formulaire.reset();
-        formulaire.hidden = true;
-        boutonFrom.hidden = false;
+  try {
+    await insertarMaterial("tonnelles", {
+      nom: document
+        .querySelector("#nom-tonnelle")
+        .value,
 
-        alert("Materiel ajouté correctement");
-        } catch (error) {
-            alert(`Error: ${error.message}`);
-        } finally {
-            boutonSauvegarder.disabled = false;
-        }
+      quantite: 1,
 
+      stockMinim: 0,
+
+      lieu:
+        document
+          .querySelector("#lieu-tonnelle")
+          .value
+          .trim() || null,
+
+      etat: "disponible"
+    });
+
+    formulaireTonnelle.reset();
+    fenetreAjoutTonnelle.close();
+
+    await afficherTonnelles();
+
+    alert("Tonnelle ajoutée correctement");
+  } catch (error) {
+    console.error(
+      "Erreur lors de l'ajout de la tonnelle :",
+      error
+    );
+
+    alert(`Erreur : ${error.message}`);
+  } finally {
+    boutonSauvegarderTonnelle.disabled = false;
+  }
+}
+
+
+async function recupererTonnelles() {
+  const { data, error } = await supabase
+    .from("tonnelles")
+    .select(`
+      id,
+      nombre,
+      ubicacion,
+      estado
+    `)
+    .order("nombre", {
+      ascending: true
+    });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+
+async function afficherTonnelles() {
+  listeTonnelles.textContent =
+    "Chargement des tonnelles...";
+
+  try {
+    const tonnelles = await recupererTonnelles();
+
+    listeTonnelles.replaceChildren();
+
+    if (tonnelles.length === 0) {
+      listeTonnelles.textContent =
+        "Aucune tonnelle enregistrée.";
+
+      return;
+    }
+
+    tonnelles.forEach((tonnelle) => {
+      const carteTonnelle =
+        document.createElement("article");
+
+      carteTonnelle.className =
+        "carte-tonnelle";
+
+      const nomTonnelle =
+        document.createElement("h2");
+
+      nomTonnelle.textContent =
+        tonnelle.nombre;
+
+      const lieuTonnelle =
+        document.createElement("p");
+
+      lieuTonnelle.textContent =
+        `Lieu : ${tonnelle.ubicacion || "Non renseigné"}`;
+
+      const etatTonnelle =
+        document.createElement("p");
+
+      etatTonnelle.textContent =
+        `État : ${tonnelle.estado}`;
+
+      carteTonnelle.append(
+        nomTonnelle,
+        lieuTonnelle,
+        etatTonnelle
+      );
+
+      listeTonnelles.appendChild(
+        carteTonnelle
+      );
+    });
+  } catch (error) {
+    console.error(
+      "Erreur lors du chargement des tonnelles :",
+      error
+    );
+
+    listeTonnelles.textContent =
+      `Impossible de charger les tonnelles : ${error.message}`;
+  }
 }
