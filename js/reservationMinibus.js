@@ -56,10 +56,11 @@ initialiserPageReservation();
 
 
 async function initialiserPageReservation() {
-  const dateAujourdhui = obtenirDateAujourdhui();
+  const dateHeureActuelle = obtenirDateHeureActuelle();
 
-  dateDebutReservation.min = dateAujourdhui;
-  dateFinReservation.min = dateAujourdhui;
+    dateDebutReservation.min = dateHeureActuelle;
+
+    dateFinReservation.min = dateHeureActuelle;
 
   dateDebutReservation.addEventListener(
     "change",
@@ -75,32 +76,54 @@ async function initialiserPageReservation() {
 }
 
 
-function obtenirDateAujourdhui() {
-  const date = new Date();
-  const decalage = date.getTimezoneOffset();
+function obtenirDateHeureActuelle() {
+  return formaterDateHeureLocale(new Date());
+}
+
+function formaterDateHeureLocale(date) {
+  const decalage =
+    date.getTimezoneOffset() * 60000;
 
   return new Date(
-    date.getTime() - decalage * 60000
+    date.getTime() - decalage
   )
     .toISOString()
-    .slice(0, 10);
+    .slice(0, 16);
 }
 
 
 function actualiserDateFinMinimum() {
-  dateFinReservation.min =
+  const valeurDebut =
     dateDebutReservation.value;
 
+  dateFinReservation.min = valeurDebut;
+
+  if (!valeurDebut) {
+    return;
+  }
+
+  const dateDebut = new Date(valeurDebut);
+  const dateFin = new Date(
+    dateFinReservation.value
+  );
+
   if (
-    dateFinReservation.value &&
-    dateFinReservation.value <
-      dateDebutReservation.value
+    !dateFinReservation.value ||
+    dateFin.getTime() <= dateDebut.getTime()
   ) {
+    const nouvelleDateFin =
+      new Date(dateDebut);
+
+    nouvelleDateFin.setHours(
+      nouvelleDateFin.getHours() + 1
+    );
+
     dateFinReservation.value =
-      dateDebutReservation.value;
+      formaterDateHeureLocale(
+        nouvelleDateFin
+      );
   }
 }
-
 
 async function recupererMinibus() {
   const { data, error } = await supabase
@@ -156,16 +179,32 @@ function verifierDatesReservation() {
     !dateFinReservation.value
   ) {
     throw new Error(
-      "Les dates de réservation sont obligatoires"
+      "Les dates et heures sont obligatoires"
+    );
+  }
+
+  const dateDebut = new Date(
+    dateDebutReservation.value
+  );
+
+  const dateFin = new Date(
+    dateFinReservation.value
+  );
+
+  if (
+    Number.isNaN(dateDebut.getTime()) ||
+    Number.isNaN(dateFin.getTime())
+  ) {
+    throw new Error(
+      "Les dates renseignées sont invalides"
     );
   }
 
   if (
-    dateFinReservation.value <
-    dateDebutReservation.value
+    dateFin.getTime() <= dateDebut.getTime()
   ) {
     throw new Error(
-      "La date de fin doit être postérieure à la date de début"
+      "La date de retour doit être postérieure à la date de départ"
     );
   }
 }
@@ -188,8 +227,10 @@ async function enregistrerReservation(event) {
         telephoneReservation.value.trim() || null,
     destination:
         destinationReservation.value.trim() || null,
-    date_debut: dateDebutReservation.value,
-    date_fin: dateFinReservation.value,
+    date_debut: new Date(dateDebutReservation.value).toISOString(),
+
+    date_fin: new Date(dateFinReservation.value).toISOString(),
+
     nombre_passagers: Number(
         nombrePassagersReservation.value
     ),
@@ -200,6 +241,21 @@ async function enregistrerReservation(event) {
     const { error } = await supabase
       .from("reservations_minibus")
       .insert(nouvelleReservation);
+
+    if (error.code === "23514") {
+        afficherMessageReservation("La date de retour doit être postérieure à la date de départ.",true);
+
+  return;
+}
+
+    if (error.code === "23P01") {
+        afficherMessageReservation(
+            "Ce minibus est déjà réservé pendant cette période.",
+            true
+        );
+
+  return;
+}
 
     if (error) {
       throw error;
