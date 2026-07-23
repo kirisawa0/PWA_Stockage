@@ -1,121 +1,114 @@
-const CACHE_NAME = "pwa-github-v8";
+const CACHE_NAME = "pwa-stockage-v9";
 
 const FILES_TO_CACHE = [
   "./",
   "./index.html",
+  "./materiel.html",
   "./mouvements.html",
+  "./tonnelles.html",
   "./reservation-tonnelles.html",
   "./agenda-tonnelles.html",
-  "./tonnelles.html",
+  "./minibus.html",
   "./reservationMinibus.html",
   "./agendaminibus.html",
-  "./minibus.html",
-
   "./styles.css",
-
-  "./js/minibus.js",
-  "./js/reservationMinibus.js",
-  "./js/agendaMinibus.js",
-  "./js/tonelles.js",
+  "./manifest.webmanifest",
   "./js/app.js",
+  "./js/navigation.js",
+  "./js/bodega.js",
+  "./js/materiel.js",
+  "./js/tonelles.js",
+  "./js/minibus.js",
   "./js/mouvement.js",
+  "./js/mouvementStock.js",
+  "./js/insertarMaterial.js",
   "./js/reservationTonnelles.js",
   "./js/agendaTonnelles.js",
-  "./manifest.webmanifest",
+  "./js/reservationMinibus.js",
+  "./js/agendaMinibus.js",
   "./icons/icon-192.svg",
-  "./icons/icon-512.svg"
+  "./icons/icon-512.svg",
+  "./icons/navigation/bodega.svg",
+  "./icons/navigation/materiel.svg",
+  "./icons/navigation/tonnelles.svg",
+  "./icons/navigation/minibus.svg"
 ];
 
-// Install the service worker and cache static files
+const OFFLINE_PAGE = new URL(
+  "./index.html",
+  self.registration.scope
+).href;
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(FILES_TO_CACHE);
+    caches.open(CACHE_NAME).then(async (cache) => {
+      await Promise.allSettled(
+        FILES_TO_CACHE.map((file) => cache.add(file))
+      );
     })
   );
 
   self.skipWaiting();
 });
 
-// Delete old caches and activate the new service worker
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
-      const oldCaches = cacheNames
-        .filter((cacheName) => cacheName !== CACHE_NAME)
-        .map((cacheName) => caches.delete(cacheName));
-
-      return Promise.all(oldCaches);
+      return Promise.all(
+        cacheNames
+          .filter((cacheName) => cacheName !== CACHE_NAME)
+          .map((cacheName) => caches.delete(cacheName))
+      );
     })
   );
 
   self.clients.claim();
 });
 
-// Handle network requests
 self.addEventListener("fetch", (event) => {
   const request = event.request;
+  const requestUrl = new URL(request.url);
 
-  // Only handle GET requests
   if (request.method !== "GET") {
     return;
   }
 
-  // Do not cache Supabase requests
   if (
-    request.url.includes("supabase.co") ||
-    request.url.includes("supabase.com")
+    requestUrl.hostname.includes("supabase.co") ||
+    requestUrl.hostname.includes("supabase.com")
   ) {
     return;
   }
 
-  // Network-first strategy for HTML pages
-  if (request.mode === "navigate") {
-    event.respondWith(
-      fetch(request)
-        .then((networkResponse) => {
+  if (requestUrl.origin !== self.location.origin) {
+    return;
+  }
+
+  event.respondWith(
+    fetch(request)
+      .then((networkResponse) => {
+        if (networkResponse.ok) {
           const responseCopy = networkResponse.clone();
 
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(request, responseCopy);
           });
-
-          return networkResponse;
-        })
-        .catch(async () => {
-          const cachedResponse = await caches.match(request);
-
-          return cachedResponse || caches.match("/index.html");
-        })
-    );
-
-    return;
-  }
-
-  // Cache-first strategy for CSS, JavaScript, images and other files
-  event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
-      return fetch(request).then((networkResponse) => {
-        if (
-          !networkResponse ||
-          networkResponse.status !== 200 ||
-          networkResponse.type === "opaque"
-        ) {
-          return networkResponse;
         }
 
-        const responseCopy = networkResponse.clone();
-
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(request, responseCopy);
-        });
-
         return networkResponse;
-      });
-    })
+      })
+      .catch(async () => {
+        const cachedResponse = await caches.match(request);
+
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+
+        if (request.mode === "navigate") {
+          return caches.match(OFFLINE_PAGE);
+        }
+
+        return Response.error();
+      })
   );
 });
