@@ -242,8 +242,7 @@ async function enregistrerReservation(event) {
       .from("reservations_minibus")
       .insert(nouvelleReservation);
 
-    if (error.code === "23514") {
-        afficherMessageReservation("La date de retour doit être postérieure à la date de départ.",true);
+    
 
   return;
 }
