@@ -245,7 +245,7 @@ async function enregistrerReservation(event) {
     
 
   return;
-}
+
 
     if (error.code === "23P01") {
         afficherMessageReservation(
