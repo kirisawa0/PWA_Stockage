@@ -100,6 +100,27 @@
         Date et heure de retour
         </label>
 
+        <label class="option-repetition">
+        <input
+            id="reservation-repetitive"
+            type="checkbox"
+        >
+            Répéter cette réservation chaque semaine
+        </label>
+
+        <div id="options-repetition" hidden>
+        <label for="date-fin-repetition">
+            Répéter jusqu'au
+        </label>
+
+        <input
+            id="date-fin-repetition"
+            type="date"
+        >
+
+        <p id="resume-repetition"></p>
+        </div>
+
         <input
         id="date-fin-reservation"
         type="datetime-local"

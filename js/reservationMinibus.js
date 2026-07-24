@@ -51,6 +51,26 @@ const nombrePassagersReservation =
     "#nombre-passagers-reservation"
   );
 
+  const reservationRepetitive =
+  document.querySelector(
+    "#reservation-repetitive"
+  );
+
+const optionsRepetition =
+  document.querySelector(
+    "#options-repetition"
+  );
+
+const dateFinRepetition =
+  document.querySelector(
+    "#date-fin-repetition"
+  );
+
+const resumeRepetition =
+  document.querySelector(
+    "#resume-repetition"
+  );
+
 
 initialiserPageReservation();
 
@@ -62,17 +82,30 @@ async function initialiserPageReservation() {
 
     dateFinReservation.min = dateHeureActuelle;
 
-  dateDebutReservation.addEventListener(
+    dateDebutReservation.addEventListener(
+        "change",
+        actualiserDateFinMinimum
+    );
+
+    formulaireReservation.addEventListener(
+        "submit",
+        enregistrerReservation
+    );
+    reservationRepetitive.addEventListener(
     "change",
-    actualiserDateFinMinimum
-  );
+    basculerOptionsRepetition
+        );
 
-  formulaireReservation.addEventListener(
-    "submit",
-    enregistrerReservation
-  );
+    dateDebutReservation.addEventListener(
+    "change",
+    afficherResumeRepetition
+    );
 
-  await remplirSelectionMinibus();
+    dateFinRepetition.addEventListener(
+    "change",
+    afficherResumeRepetition
+    );
+    await remplirSelectionMinibus();
 }
 
 
@@ -219,75 +252,85 @@ async function enregistrerReservation(event) {
   try {
     verifierDatesReservation();
 
-    const nouvelleReservation = {
-    minibus_id: selectionMinibus.value,
-    nom_reservation: nomReservation.value.trim(),
-    responsable: responsableReservation.value.trim(),
-    telephone:
-        telephoneReservation.value.trim() || null,
-    destination:
-        destinationReservation.value.trim() || null,
-    date_debut: new Date(dateDebutReservation.value).toISOString(),
+    const informationsReservation = {
+      minibus_id:
+        selectionMinibus.value,
 
-    date_fin: new Date(dateFinReservation.value).toISOString(),
+      nom_reservation:
+        nomReservation.value.trim(),
 
-    nombre_passagers: Number(
+      responsable:
+        responsableReservation.value.trim(),
+
+      telephone:
+        telephoneReservation.value.trim() ||
+        null,
+
+      destination:
+        destinationReservation.value.trim() ||
+        null,
+
+      nombre_passagers: Number(
         nombrePassagersReservation.value
-    ),
-    statut: "confirmee",
-    notes: notesReservation.value.trim() || null
+      ),
+
+      statut: "confirmee",
+
+      notes:
+        notesReservation.value.trim() ||
+        null
     };
+
+    const reservations =
+      creerReservationsRepetitives(
+        informationsReservation
+      );
 
     const { error } = await supabase
       .from("reservations_minibus")
-      .insert(nouvelleReservation);
-
-    
-
-  return;
-
-
-    if (error.code === "23P01") {
-        afficherMessageReservation(
-            "Ce minibus est déjà réservé pendant cette période.",
-            true
-        );
-
-  return;
-}
+      .insert(reservations);
 
     if (error) {
+      if (error.code === "23514") {
+        throw new Error(
+          "La date de retour doit être postérieure à la date de départ."
+        );
+      }
+
+      if (error.code === "23P01") {
+        throw new Error(
+          "Le minibus est déjà réservé pendant au moins une des périodes demandées."
+        );
+      }
+
       throw error;
     }
 
     formulaireReservation.reset();
 
-    const dateAujourdhui =
-      obtenirDateAujourdhui();
+    optionsRepetition.hidden = true;
+    dateFinRepetition.required = false;
+    resumeRepetition.textContent = "";
+
+    const dateHeureActuelle =
+      obtenirDateHeureActuelle();
 
     dateDebutReservation.min =
-      dateAujourdhui;
+      dateHeureActuelle;
 
     dateFinReservation.min =
-      dateAujourdhui;
+      dateHeureActuelle;
 
     afficherMessageReservation(
-      "Réservation enregistrée correctement."
+      reservations.length === 1
+        ? "Réservation enregistrée correctement."
+        : `${reservations.length} réservations enregistrées correctement.`
     );
   } catch (error) {
     console.error(
       "Erreur lors de la réservation :",
       error
     );
-
-    if (error.code === "23P01") {
-      afficherMessageReservation(
-        "Ce minibus est déjà réservée pendant cette période.",
-        true
-      );
-
-      return;
-    }
 
     afficherMessageReservation(
       error.message ||
@@ -315,4 +358,138 @@ function afficherMessageReservation(
     "message-succes",
     Boolean(message) && !estErreur
   );
+}
+
+function basculerOptionsRepetition() {
+  optionsRepetition.hidden =
+    !reservationRepetitive.checked;
+
+  dateFinRepetition.required =
+    reservationRepetitive.checked;
+
+  if (!reservationRepetitive.checked) {
+    dateFinRepetition.value = "";
+    resumeRepetition.textContent = "";
+    return;
+  }
+
+  afficherResumeRepetition();
+}
+
+
+function afficherResumeRepetition() {
+  if (
+    !reservationRepetitive.checked ||
+    !dateDebutReservation.value
+  ) {
+    resumeRepetition.textContent = "";
+    return;
+  }
+
+  const dateDebut =
+    new Date(dateDebutReservation.value);
+
+  if (Number.isNaN(dateDebut.getTime())) {
+    resumeRepetition.textContent = "";
+    return;
+  }
+
+  const jour = new Intl.DateTimeFormat(
+    "fr-FR",
+    {
+      weekday: "long"
+    }
+  ).format(dateDebut);
+
+  resumeRepetition.textContent =
+    `La réservation sera répétée chaque ${jour}.`;
+}
+
+function creerReservationsRepetitives(
+  informationsReservation
+) {
+  const debutInitial =
+    new Date(dateDebutReservation.value);
+
+  const finInitial =
+    new Date(dateFinReservation.value);
+
+  if (!reservationRepetitive.checked) {
+    return [
+      {
+        ...informationsReservation,
+        date_debut: debutInitial.toISOString(),
+        date_fin: finInitial.toISOString(),
+        serie_id: null
+      }
+    ];
+  }
+
+  if (!dateFinRepetition.value) {
+    throw new Error(
+      "La date de fin de répétition est obligatoire"
+    );
+  }
+
+  const limiteRepetition = new Date(
+    `${dateFinRepetition.value}T23:59:59`
+  );
+
+  if (limiteRepetition < debutInitial) {
+    throw new Error(
+      "La fin de répétition doit être postérieure à la première réservation"
+    );
+  }
+
+  const identifiantSerie =
+    crypto.randomUUID();
+
+  const dureeReservation =
+    finInitial.getTime() -
+    debutInitial.getTime();
+
+  const reservations = [];
+
+  let debutOccurrence =
+    new Date(debutInitial);
+
+  while (
+    debutOccurrence <= limiteRepetition
+  ) {
+    if (reservations.length >= 104) {
+      throw new Error(
+        "Une série ne peut pas dépasser 104 réservations"
+      );
+    }
+
+    const finOccurrence = new Date(
+      debutOccurrence.getTime() +
+      dureeReservation
+    );
+
+    reservations.push({
+      ...informationsReservation,
+
+      date_debut:
+        debutOccurrence.toISOString(),
+
+      date_fin:
+        finOccurrence.toISOString(),
+
+      serie_id:
+        identifiantSerie
+    });
+
+    const occurrenceSuivante =
+      new Date(debutOccurrence);
+
+    occurrenceSuivante.setDate(
+      occurrenceSuivante.getDate() + 7
+    );
+
+    debutOccurrence =
+      occurrenceSuivante;
+  }
+
+  return reservations;
 }
